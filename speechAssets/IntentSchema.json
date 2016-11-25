@@ -1,0 +1,22 @@
+{
+  "intents": [
+    {
+      "intent": "BookatableIntent",
+       "slots": [
+        {
+          "name": "Time",
+          "type": "BOOKING_TIME"
+        }
+      ]
+    },
+    {
+      "intent": "PartySizeIntent",
+      "slots": [
+        {
+          "name": "PartySize",
+          "type": "PARTY_SIZE"
+        }
+      ]
+    }
+  ]
+}
