@@ -27,8 +27,8 @@ BookatableSkill.prototype.eventHandlers.onSessionStarted = function (sessionStar
 
 BookatableSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("BookatableSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to the Alexa Skills Kit, you can say hello";
-    var repromptText = "You can say hello";
+    var speechOutput = "Welcome to Bookatable, you can say book a table and the time you want";
+    var repromptText = "You can say book a table and the time you want";
     response.ask(speechOutput, repromptText);
 };
 

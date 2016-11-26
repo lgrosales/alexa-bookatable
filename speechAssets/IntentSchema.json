@@ -5,7 +5,7 @@
        "slots": [
         {
           "name": "Time",
-          "type": "BOOKING_TIME"
+          "type": "AMAZON.TIME"
         }
       ]
     },
@@ -14,7 +14,7 @@
       "slots": [
         {
           "name": "PartySize",
-          "type": "PARTY_SIZE"
+          "type": "AMAZON.NUMBER"
         }
       ]
     }
