@@ -1,13 +1,15 @@
 /**
- * Examples:
- * One-shot model:
+ * Dialog model:
  *  User: "Alexa, tell Bookatable to book a table at [9PM]"
- *  Alexa: "How many people do you need a table for?"
+ *  Alexa: "Of course! For how many people?"
  *  User: "[Two]"
- *  Alexa: "A table for [two] will be ready for you at [9PM] in [La Patagonia]"
+ *  Alexa: "A table for [two] will be ready for you at [9PM] in your favourite restaurant"
  */
 
+'use strict';
+
 var APP_ID = "amzn1.ask.skill.e6e3f015-f473-4c82-b3b7-aaa9332d81e5";
+var KEY_TIME = "time"
 
 var AlexaSkill = require('./AlexaSkill');
 
@@ -27,8 +29,8 @@ BookatableSkill.prototype.eventHandlers.onSessionStarted = function (sessionStar
 
 BookatableSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("BookatableSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to Bookatable, you can say book a table and the time you want";
-    var repromptText = "You can say book a table and the time you want";
+    var speechOutput = "Welcome to Book a table, you can ask me to book a table at the time you want";
+    var repromptText = "You can ask me to book a table at the time you want";
     response.ask(speechOutput, repromptText);
 };
 
@@ -40,12 +42,22 @@ BookatableSkill.prototype.eventHandlers.onSessionEnded = function (sessionEndedR
 
 BookatableSkill.prototype.intentHandlers = {
     "BookatableIntent": function (intent, session, response) {
-        response.ask("Of course! How many people do you want me to book for?", "Of course! How many people do you want me to book for?");
+        session.attributes[KEY_TIME] = intent.slots.Time.value;
+        response.ask("Of course! For how many people?", "How many people do you want me to book for?");
     },
     "PartySizeIntent": function (intent, session, response) {
-        response.tellWithCard("A table for two will be ready for you at 9PM in La Patagonia", "A table for two will be ready for you at 9PM in La Patagonia", "A table for two will be ready for you at 9PM in La Patagonia");
+        handleBooking(intent, session, response);
     }
 };
+
+function handleBooking(intent, session, response) {
+    var time = session.attributes[KEY_TIME];
+    var partySize = intent.slots.PartySize.value;
+    var speechOutput = "A table for " + partySize + " will be ready for you at " + time + " in your favourite restaurant";
+    var cardTitle = "Your booking at La Patagonia";
+    console.log("BookatableSkill handleBooking: " + speechOutput);
+    response.tellWithCard(speechOutput, cardTitle, speechOutput);
+}
 
 exports.handler = function (event, context) {
     var bookatableSkill = new BookatableSkill();
