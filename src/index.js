@@ -29,7 +29,7 @@ BookatableSkill.prototype.eventHandlers.onSessionStarted = function (sessionStar
 
 BookatableSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("BookatableSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to Book a table, you can ask me to book a table at the time you want";
+    var speechOutput = "Hi! Welcome to Book a table, you can ask me to book a table at the time you want";
     var repromptText = "You can ask me to book a table at the time you want";
     response.ask(speechOutput, repromptText);
 };
@@ -54,7 +54,7 @@ function handleBooking(intent, session, response) {
     var time = session.attributes[KEY_TIME];
     var partySize = intent.slots.PartySize.value;
     var speechOutput = "A table for " + partySize + " will be ready for you at " + time + " in your favourite restaurant";
-    var cardTitle = "Your booking at La Patagonia";
+    var cardTitle = "Booking confirmed!";
     console.log("BookatableSkill handleBooking: " + speechOutput);
     response.tellWithCard(speechOutput, cardTitle, speechOutput);
 }
