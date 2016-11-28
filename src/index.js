@@ -58,22 +58,11 @@ BookatableSkill.prototype.intentHandlers = {
 
 function handleCreateBooking(intent, session, response) {
     var time = session.attributes[KEY_TIME];
-    var partySize = intent.slots.PartySize.value;
-    var speechOutput = "A table for " + partySize + " will be ready for you at " + time + " in your favourite restaurant";
-    var cardTitle = "Booking confirmed!";
-    
-    console.log("BookatableSkill handleCreateBooking: " + speechOutput);
- 
-    createBooking(time, partySize);
-    
-    response.tellWithCard(speechOutput, cardTitle, speechOutput);
-}
-
-function createBooking(time, partySize) {
+    var partySize = intent.slots.PartySize.value;   
     var addBookingCommand = getAddBookingCommand(time, partySize);
     console.log("BookatableSkill addBookingCommand: " + addBookingCommand);
 
-     var post_options = {
+     var postOptions = {
       host: API_HOST,
       path: CREATE_BOOKING_ENDPOINT,
       method: 'POST',
@@ -83,21 +72,29 @@ function createBooking(time, partySize) {
         }
     };
 
-    var post_req = https.request(post_options, function(res) {
+    var postReq = https.request(postOptions, function(res) {
         console.log("STATUS: " + res.statusCode);
         console.log("HEADERS: " + JSON.stringify(res.headers));
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
             console.log('Response: ' + chunk);
+            bookingConfirmed(response, time, partySize);
         });
     });
 
-    post_req.on("error", function(e) {
+    postReq.on("error", function(e) {
         console.log("problem with request: " + e.message);
     });
 
-    post_req.write(addBookingCommand);
-    post_req.end();
+    postReq.write(addBookingCommand);
+    postReq.end();
+}
+
+function bookingConfirmed(response, time, partySize) {
+    var speechOutput = "A table for " + partySize + " will be ready for you at " + time + " in your favourite restaurant";
+    var cardTitle = "Booking confirmed!";
+    console.log("BookatableSkill bookingConfirmed: " + speechOutput);
+    response.tellWithCard(speechOutput, cardTitle, speechOutput);
 }
 
 function getAddBookingCommand(time, partySize) {
@@ -134,8 +131,6 @@ function getBookingDateTimeUtc(time) {
 }
 
 exports.handler = function (event, context) {
-    // USE:
-    // context.callbackWaitsForEmptyEventLoop = false;
     var bookatableSkill = new BookatableSkill();
     bookatableSkill.execute(event, context);
 };
