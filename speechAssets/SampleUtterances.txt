@@ -2,5 +2,6 @@ BookatableIntent book a table at {Time}
 BookatableIntent book me a table at {Time}
 BookatableIntent get me a table at {Time}
 BookatableIntent book at {Time}
+BookatableIntent at {Time}
 PartySizeIntent for {PartySize}
 PartySizeIntent {PartySize}

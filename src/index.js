@@ -11,12 +11,13 @@
 'use strict';
 
 var APP_ID = "amzn1.ask.skill.e6e3f015-f473-4c82-b3b7-aaa9332d81e5"; // process.env.APP_ID
-var CREATE_BOOKING_ENDPOINT = "https://{apiHost}/v2/bookings"; // process.env.CREATE_BOOKING_ENDPOINT
+var API_HOST = "prod-neptune-widgetapi.cl.bookatable.com"; // process.env.API_HOST
+var CREATE_BOOKING_ENDPOINT = "/v1/bookings"; 
 var RESTAURANT_ID = "f115f0f9a5d44318b64c7f84c94dd9fc"; // process.env.RESTAURANT_ID
 var KEY_TIME = "time";
 
 var AlexaSkill = require('./AlexaSkill');
-// var http = require('http');
+var https = require('https');
 
 var BookatableSkill = function () {
     AlexaSkill.call(this, APP_ID);
@@ -34,7 +35,7 @@ BookatableSkill.prototype.eventHandlers.onSessionStarted = function (sessionStar
 
 BookatableSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("BookatableSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Hi! Welcome to Book a table, you can ask me to book a table at the time you want";
+    var speechOutput = "Hi Leo! Welcome to Book a table. At what time do you want me to book a table for you?";
     var repromptText = "You can ask me to book a table at the time you want";
     response.ask(speechOutput, repromptText);
 };
@@ -62,7 +63,7 @@ function handleCreateBooking(intent, session, response) {
     var cardTitle = "Booking confirmed!";
     
     console.log("BookatableSkill handleCreateBooking: " + speechOutput);
-    
+ 
     createBooking(time, partySize);
     
     response.tellWithCard(speechOutput, cardTitle, speechOutput);
@@ -70,40 +71,50 @@ function handleCreateBooking(intent, session, response) {
 
 function createBooking(time, partySize) {
     var addBookingCommand = getAddBookingCommand(time, partySize);
-    console.log("BookatableSkill addBookingCommand: " + JSON.stringify(addBookingCommand));
+    console.log("BookatableSkill addBookingCommand: " + addBookingCommand);
 
-    //  var post_options = {
-    //   host: CREATE_BOOKING_ENDPOINT,
-    //   port: '80',
-    //   path: '',
-    //   method: 'POST',
-    //   headers: {
-    //       'Content-Type': 'application/json',
-    //       'Content-Length': Buffer.byteLength(addBookingCommand)
-    //     }
-    // };
+     var post_options = {
+      host: API_HOST,
+      path: CREATE_BOOKING_ENDPOINT,
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(addBookingCommand)
+        }
+    };
 
-    // var post_req = http.request(post_options, function(res) {
-    //     res.setEncoding('utf8');
-    //     res.on('data', function (chunk) {
-    //         console.log('Response: ' + chunk);
-    //     });
-    // });
+    var post_req = https.request(post_options, function(res) {
+        console.log("STATUS: " + res.statusCode);
+        console.log("HEADERS: " + JSON.stringify(res.headers));
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+        });
+    });
 
-    // post_req.write(addBookingCommand);
-    // post_req.end();
+    post_req.on("error", function(e) {
+        console.log("problem with request: " + e.message);
+    });
+
+    post_req.write(addBookingCommand);
+    post_req.end();
 }
 
 function getAddBookingCommand(time, partySize) {
     var bookingDateTimeUtc = getBookingDateTimeUtc(time);
-    return {
+    var addBookingCommand = {
         salesforceCustomerId: RESTAURANT_ID,
         partySize: partySize,
         dateTimeUtc: bookingDateTimeUtc,
         channel: "Alexa",
         bookingSource: "Alexa",
+        timeZone:"Europe/London",
+        cultureCode:"en-GB",
         walkIn: false,
         shiftId: null,
+        restaurant: null,
+        optInMarketingFromRestaurant:false,
+        optInMarketingFromBookatable:false,
         guest: {
             firstName: "HAL",
             lastName: "9000",
@@ -112,6 +123,7 @@ function getAddBookingCommand(time, partySize) {
         },
         notes: "I'm sorry, Dave. I'm afraid I can't do that."
     };
+    return JSON.stringify(addBookingCommand);
 }
 
 function getBookingDateTimeUtc(time) {
@@ -122,6 +134,8 @@ function getBookingDateTimeUtc(time) {
 }
 
 exports.handler = function (event, context) {
+    // USE:
+    // context.callbackWaitsForEmptyEventLoop = false;
     var bookatableSkill = new BookatableSkill();
     bookatableSkill.execute(event, context);
 };
