@@ -1,6 +1,6 @@
 /**
  * One-shot model:
- *  Not Implemented
+ *  Not Implemented (ie: "Alexa, ask Bookatable to book a table for [two] at [9PM]")
  * Dialog model:
  *  User: "Alexa, tell Bookatable to book a table at [9PM]"
  *  Alexa: "Of course! For how many people?"
@@ -8,16 +8,16 @@
  *  Alexa: "A table for [two] will be ready for you at [9PM] in your favourite restaurant"
  */
 
-'use strict';
+"use strict";
 
-var APP_ID = "amzn1.ask.skill.e6e3f015-f473-4c82-b3b7-aaa9332d81e5"; // process.env.APP_ID
-var API_HOST = "prod-neptune-widgetapi.cl.bookatable.com"; // process.env.API_HOST
-var CREATE_BOOKING_ENDPOINT = "/v1/bookings"; 
-var RESTAURANT_ID = "f115f0f9a5d44318b64c7f84c94dd9fc"; // process.env.RESTAURANT_ID
+var APP_ID = process.env.APP_ID;
+var API_HOST = process.env.API_HOST; 
+var RESTAURANT_ID = process.env.RESTAURANT_ID;
+var CREATE_BOOKING_ENDPOINT = "/v1/bookings";
 var KEY_TIME = "time";
 
-var AlexaSkill = require('./AlexaSkill');
-var https = require('https');
+var AlexaSkill = require("./AlexaSkill");
+var https = require("https");
 
 var BookatableSkill = function () {
     AlexaSkill.call(this, APP_ID);
@@ -35,7 +35,7 @@ BookatableSkill.prototype.eventHandlers.onSessionStarted = function (sessionStar
 
 BookatableSkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("BookatableSkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Hi Leo! Welcome to Book a table. At what time do you want me to book a table for you?";
+    var speechOutput = "Hi Leo! Welcome to Omnia. At what time do you want me to book a table for you?";
     var repromptText = "You can ask me to book a table at the time you want";
     response.ask(speechOutput, repromptText);
 };
@@ -65,19 +65,19 @@ function handleCreateBooking(intent, session, response) {
      var postOptions = {
       host: API_HOST,
       path: CREATE_BOOKING_ENDPOINT,
-      method: 'POST',
+      method: "POST",
       headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(addBookingCommand)
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(addBookingCommand)
         }
     };
 
     var postReq = https.request(postOptions, function(res) {
         console.log("STATUS: " + res.statusCode);
         console.log("HEADERS: " + JSON.stringify(res.headers));
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
+        res.setEncoding("utf8");
+        res.on("data", function (chunk) {
+            console.log("Response: " + chunk);
             bookingConfirmed(response, time, partySize);
         });
     });
@@ -115,7 +115,7 @@ function getAddBookingCommand(time, partySize) {
         guest: {
             firstName: "HAL",
             lastName: "9000",
-            phoneNumber: "9000",
+            phoneNumber: "+44 9000",
             emailAddress: "hal@9000.ai",
         },
         notes: "I'm sorry, Dave. I'm afraid I can't do that."
